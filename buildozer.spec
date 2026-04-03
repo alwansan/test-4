@@ -13,7 +13,7 @@ requirements = python3,flask,requests,certifi,urllib3,charset-normalizer,idna,we
 
 android.minapi  = 24
 android.api     = 34
-android.ndk_api = 25b
+android.ndk_api = 24
 android.archs   = arm64-v8a, armeabi-v7a
 android.accept_sdk_license = True
 

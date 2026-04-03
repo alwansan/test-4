@@ -1,0 +1,142 @@
+name: 🏗️ Build B-Ultra APK
+
+# ── يبدأ البناء تلقائياً عند أي push أو يدوياً من Actions tab ──
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:    # زر "Run workflow" اليدوي
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    # ubuntu-22.04 ← أكثر استقراراً مع buildozer من ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+
+    # ── 1. تنزيل الكود ──────────────────────────────────────────
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    # ── 2. Python 3.10 ──────────────────────────────────────────
+    - name: 🐍 Setup Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # ── 3. Java 17 ───────────────────────────────────────────────
+    - name: ☕ Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # ── 4. حزم النظام المطلوبة ───────────────────────────────────
+    - name: 📦 Install system dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+          git zip unzip wget \
+          build-essential autoconf automake libtool \
+          pkg-config cmake lld \
+          libncurses5-dev libncursesw5-dev libtinfo5 \
+          libffi-dev libssl-dev \
+          zlib1g-dev
+
+    # ── 5. Python packages ────────────────────────────────────────
+    - name: 🔧 Install Python build tools
+      run: |
+        pip install --upgrade pip
+        pip install --upgrade "Cython==0.29.36"
+        pip install --upgrade buildozer==1.5.0 virtualenv
+
+    # ── 6. إصلاح JAVA_HOME ────────────────────────────────────────
+    - name: ☕ Fix Java PATH
+      run: |
+        echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
+        java -version
+
+    # ── 7. Cache: SDK + NDK (يوفّر 15+ دقيقة في الـ runs التالية) ──
+    - name: 💾 Cache Android SDK
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer/android/platform/android-sdk
+        key: android-sdk-${{ runner.os }}-v1
+
+    - name: 💾 Cache Android NDK
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer/android/platform/android-ndk-r25b
+        key: android-ndk-r25b-${{ runner.os }}-v1
+
+    - name: 💾 Cache python-for-android builds
+      uses: actions/cache@v4
+      with:
+        path: ~/.buildozer/android/platform/python-for-android
+        key: p4a-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}-v1
+        restore-keys: |
+          p4a-${{ runner.os }}-
+
+    # ── 8. قبول تراخيص Android SDK تلقائياً (يحل مشكلة AIDL) ─────
+    - name: ✅ Pre-accept Android SDK licenses
+      run: |
+        # إنشاء مجلد الترخيص مسبقاً — يحل مشكلة "Aidl not found"
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        # قبول كل التراخيص المعروفة مسبقاً
+        echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo "84831b9409646a918e30573bab4c9c91346d8abd" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+        echo "504667f4c0de7af1a06de9f4b1727b84351f2910" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
+        echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > ~/.buildozer/android/platform/android-sdk/licenses/google-gdk-license
+        echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > ~/.buildozer/android/platform/android-sdk/licenses/android-googletv-license
+        echo "859f317696f67ef3d7f30a50a5560e7834b43903" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-arm-dbt-license
+        echo "e9acab5b5fbb560a72cfaecce8946896ff6aab9d" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-extra-license
+        echo "License files written ✅"
+        ls ~/.buildozer/android/platform/android-sdk/licenses/
+
+    # ── 9. تعديل main.py لإضافة أذونات Android ──────────────────
+    - name: 🔧 Patch main.py for Android permissions
+      run: python .ci/patch_main.py
+
+    # ── 10. البناء ────────────────────────────────────────────────
+    - name: 🏗️ Build APK with Buildozer
+      env:
+        # يخبر buildozer بقبول الترخيص تلقائياً
+        APP_ANDROID_ACCEPT_SDK_LICENSE: true
+      run: |
+        export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+        export PATH=$JAVA_HOME/bin:~/.local/bin:$PATH
+
+        echo "☕ Java: $(java -version 2>&1 | head -1)"
+        echo "🏗️  Buildozer: $(buildozer --version 2>&1 | head -1)"
+        echo "🐍 Python: $(python --version)"
+        echo ""
+        echo "🚀 Starting build..."
+
+        # yes '' يجيب تلقائياً على كل [y/n] أو [y/N]
+        yes '' | buildozer android debug 2>&1 | tee build_output.log
+
+    # ── 11. رفع APK كـ Artifact (قابل للتحميل من صفحة Actions) ───
+    - name: 📤 Upload APK artifact
+      uses: actions/upload-artifact@v4
+      if: always()   # حتى لو فشل البناء، ارفع ما وُجد
+      with:
+        name: B-Ultra-APK
+        path: |
+          bin/*.apk
+          build_output.log
+        retention-days: 30
+        if-no-files-found: warn
+
+    # ── 12. عرض ملخص ─────────────────────────────────────────────
+    - name: 📊 Build Summary
+      if: always()
+      run: |
+        echo "═══════════════════════════════════════"
+        echo "📱 APK files in bin/:"
+        ls -lah bin/*.apk 2>/dev/null || echo "❌ No APK found"
+        echo "═══════════════════════════════════════"
+        echo "📄 Last 30 lines of build log:"
+        tail -30 build_output.log 2>/dev/null || true

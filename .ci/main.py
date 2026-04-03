@@ -1,3 +1,15 @@
+
+
+# ===== AUTO PATCH: yt-dlp fallback =====
+def ensure_ytdlp():
+    try:
+        import yt_dlp
+    except ImportError:
+        import subprocess, sys
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
+
+ensure_ytdlp()
+# =====================================
 import os, sys, subprocess, threading, time, json, re, traceback
 from pathlib import Path
 from datetime import datetime

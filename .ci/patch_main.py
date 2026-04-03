@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+patch_main.py
+─────────────
+يُعدَّل هذا السكريبت في GitHub Actions قبل بدء البناء.
+يضيف إلى main.py:
+  1. دالة request_android_permissions() التلقائية
+  2. استدعاءها داخل open_browser()
+"""
 
 import os, sys, re
 

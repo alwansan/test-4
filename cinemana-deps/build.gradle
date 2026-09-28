@@ -8,12 +8,24 @@ repositories {
 configurations {
     buildPlugins
     appDeps
-    processors
+    processors {
+        attributes {
+            attribute(org.gradle.api.attributes.Usage.USAGE_ATTRIBUTE,
+                objects.named(org.gradle.api.attributes.Usage, org.gradle.api.attributes.Usage.JAVA_RUNTIME))
+            attribute(org.gradle.api.attributes.Category.CATEGORY_ATTRIBUTE,
+                objects.named(org.gradle.api.attributes.Category, org.gradle.api.attributes.Category.LIBRARY))
+            attribute(org.gradle.api.attributes.LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                objects.named(org.gradle.api.attributes.LibraryElements, org.gradle.api.attributes.LibraryElements.JAR))
+        }
+    }
 }
 
 dependencies {
     buildPlugins 'com.android.tools.build:gradle:8.1.1'
     buildPlugins 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0'
+
+    appDeps 'org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.0'
+    appDeps 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 
     appDeps 'javax.inject:javax.inject:1'
     appDeps 'org.jetbrains.kotlin:kotlin-stdlib:1.9.0'

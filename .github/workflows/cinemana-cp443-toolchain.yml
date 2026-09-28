@@ -1,0 +1,30 @@
+name: Cinemana CP443 toolchain
+
+on:
+  push:
+    branches:
+      - cinemana-cp442-dependency-cache
+    paths:
+      - '.github/workflows/cinemana-cp443-toolchain.yml'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Gradle and Android SDK components
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p out
+          curl -fL --retry 4 --retry-delay 2 -o out/gradle-8.4-bin.zip https://services.gradle.org/distributions/gradle-8.4-bin.zip
+          curl -fL --retry 4 --retry-delay 2 -o out/platform-34-ext7_r03.zip https://dl.google.com/android/repository/platform-34-ext7_r03.zip
+          curl -fL --retry 4 --retry-delay 2 -o out/build-tools_r34-linux.zip https://dl.google.com/android/repository/build-tools_r34-linux.zip
+          sha256sum out/* | tee out/SHA256SUMS.txt
+
+      - name: Upload toolchain
+        uses: actions/upload-artifact@v4
+        with:
+          name: cinemana-cp443-toolchain
+          path: out/
+          compression-level: 0
+          retention-days: 3

@@ -27,6 +27,20 @@ dependencies {
     appDeps 'org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.0'
     appDeps 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0'
 
+    // Dependencies selected by the real kapt classpath for Room 2.6.1.
+    appDeps 'androidx.room:room-compiler-processing:2.6.1'
+    appDeps 'androidx.room:room-migration:2.6.1'
+    appDeps 'com.google.auto:auto-common:0.11'
+    appDeps 'com.google.devtools.ksp:symbol-processing-api:1.9.0-1.0.13'
+    appDeps 'com.intellij:annotations:12.0'
+    appDeps 'com.squareup:javapoet:1.13.0'
+    appDeps 'com.squareup:kotlinpoet:1.14.2'
+    appDeps 'com.squareup:kotlinpoet-javapoet:1.14.2'
+    appDeps 'commons-codec:commons-codec:1.15'
+    appDeps 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    appDeps 'org.xerial:sqlite-jdbc:3.41.2.2'
+    appDeps 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+
     appDeps 'javax.inject:javax.inject:1'
     appDeps 'org.jetbrains.kotlin:kotlin-stdlib:1.9.0'
     appDeps 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'

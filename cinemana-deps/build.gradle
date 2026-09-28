@@ -100,7 +100,7 @@ dependencies {
     appDeps 'com.squareup.retrofit2:converter-gson:2.9.0'
     appDeps 'com.squareup.retrofit2:adapter-rxjava2:2.9.0'
     appDeps 'com.squareup.okhttp3:logging-interceptor:4.9.2'
-    appDeps 'com.google.code.gson:gson:2.8.8'
+    appDeps 'com.google.code.gson:gson:2.8.9'
 
     appDeps 'io.reactivex.rxjava2:rxjava:2.2.21'
     appDeps 'io.reactivex.rxjava2:rxandroid:2.1.1'

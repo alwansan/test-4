@@ -5,6 +5,12 @@ on:
     branches: ["mcp-capability-audit"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment
+        required: false
+        default: "staging"
 
 jobs:
   quick-test:
@@ -12,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Say hello
-        run: echo "MCP audit run OK at $(date)"
+        run: echo "MCP dispatch run OK at $(date) — env=${{ inputs.environment }}"
       - name: Check files
         run: |
           ls -la

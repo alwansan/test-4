@@ -1,0 +1,19 @@
+name: MCP Quick Test
+
+on:
+  push:
+    branches: ["mcp-capability-audit"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quick-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Say hello
+        run: echo "MCP audit run OK at $(date)"
+      - name: Check files
+        run: |
+          ls -la
+          test -f MCP_CAPABILITY_AUDIT.md && echo "Audit file present"

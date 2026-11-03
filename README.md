@@ -1,3 +1,5 @@
+> ℹ️ **MCP Capability Audit (2026-11-03):** تم اختبار قدرات GitHub MCP على هذا المستودع — المراجعة والدمج عبر pull request تلقائي.
+
 # 🚀 B-Ultra APK Builder via GitHub Actions
 
 يحوّل **B_Ultra_v14.py** (Flask WebApp) إلى APK جاهز للتثبيت على **Poco F5 Pro / Android 15**
